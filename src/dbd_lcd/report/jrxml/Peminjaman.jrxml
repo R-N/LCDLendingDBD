@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Peminjaman" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="df013db5-f76e-44d3-b0df-bcbc46d93160">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="237"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="753"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="DBD_LCD"/>
+	<style name="Title" fontName="Times New Roman" fontSize="50" isBold="true"/>
+	<style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
+	<style name="Column header" forecolor="#666666" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="Detail" fontName="Arial" fontSize="12"/>
+	<style name="Row" mode="Transparent">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style backcolor="#E6DAC3"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="REPORT_YEAR" class="java.lang.Integer"/>
+	<parameter name="REPORT_MONTH" class="java.lang.Integer"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT 
+	P.Waktu_Pinjam,
+	P.Identitas_Peminjam AS Nomor_Induk_Peminjam,
+	PM.Nama_Peminjam,
+	SP.Teks_Status_Peminjaman AS Status_Peminjaman,
+	IF(P.Waktu_Kembali IS NULL, P.Waktu_Harus_Kembali, P.Waktu_Kembali) AS Waktu_Kembali,
+	IF(P.Waktu_Kembali IS NULL,
+		IF(NOW() > P.Waktu_Harus_Kembali,
+			CONCAT(
+				DATEDIFF(NOW(), P.Waktu_Harus_Kembali), "d ",
+				HOUR(TIMEDIFF(NOW(), P.Waktu_Harus_Kembali)), "h ",
+				MINUTE(TIMEDIFF(NOW(), P.Waktu_Harus_Kembali)), "m "
+			),
+			""
+		),
+		IF(P.Waktu_Kembali > P.Waktu_Harus_Kembali,
+			CONCAT(
+				DATEDIFF(P.Waktu_Kembali, P.Waktu_Harus_Kembali), "d ",
+				HOUR(TIMEDIFF(P.Waktu_Kembali, P.Waktu_Harus_Kembali)), "h ",
+				MINUTE(TIMEDIFF(P.Waktu_Kembali, P.Waktu_Harus_Kembali)), "m "
+			),
+			""
+		)
+	) AS Keterlambatan,
+	GROUP_CONCAT(DISTINCT CONCAT(RB.Tipe_Barang, RB.Nomor_Barang), ", ") AS Barang_Dipinjam,
+	Get_Nama_Petugas(P.Username_Petugas) AS PJ
+FROM Peminjaman P, Peminjam PM, Riwayat_Barang RB, Status_Peminjaman SP, Tipe_Barang TP 
+WHERE P.Identitas_Peminjam=PM.Identitas_Peminjam 
+	AND P.Nomor_Peminjaman=RB.Nomor_Peminjaman
+	AND P.Status_Peminjaman=SP.Status_Peminjaman
+	AND YEAR(P.Waktu_Pinjam) = $P{REPORT_YEAR}
+	AND MONTH(P.Waktu_Pinjam) = $P{REPORT_MONTH}
+GROUP BY P.Identitas_Peminjam, PM.Nama_Peminjam, SP.Teks_Status_Peminjaman, P.Waktu_Pinjam, P.Waktu_Kembali
+ORDER BY P.Waktu_Pinjam, P.Waktu_Kembali ASC;]]>
+	</queryString>
+	<field name="Waktu_Pinjam" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="Waktu_Pinjam"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="peminjaman"/>
+	</field>
+	<field name="Nomor_Induk_Peminjam" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="Nomor_Induk_Peminjam"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="peminjaman"/>
+	</field>
+	<field name="Nama_Peminjam" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="Nama_Peminjam"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="peminjam"/>
+	</field>
+	<field name="Status_Peminjaman" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="Status_Peminjaman"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="status_peminjaman"/>
+	</field>
+	<field name="Waktu_Kembali" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="Waktu_Kembali"/>
+	</field>
+	<field name="Keterlambatan" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="Keterlambatan"/>
+	</field>
+	<field name="Barang_Dipinjam" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="Barang_Dipinjam"/>
+	</field>
+	<field name="PJ" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PJ"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="136" splitType="Stretch">
+			<image>
+				<reportElement x="0" y="0" width="164" height="126" uuid="1c003177-754c-448f-8ce1-16868856f545"/>
+				<imageExpression><![CDATA["dbd_lcd\\report\\jrxml\\coffee.jpg"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement style="Title" x="230" y="0" width="390" height="62" uuid="bc1ce1da-8232-46ea-be55-cec4abb986dd"/>
+				<textElement verticalAlignment="Middle">
+					<font size="36"/>
+				</textElement>
+				<text><![CDATA[Peminjaman LCD]]></text>
+			</staticText>
+			<image>
+				<reportElement x="633" y="-73" width="219" height="209" uuid="4aa6f4d1-27dc-4b34-9227-59e19ce2c959"/>
+				<imageExpression><![CDATA["dbd_lcd\\report\\jrxml\\coffee_stain.png"]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement style="SubTitle" x="240" y="60" width="270" height="30" uuid="68434a4e-1c34-4500-ad2b-0535392ee5c0"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textFieldExpression><![CDATA["Peminjaman " + ($P{REPORT_YEAR}).toString() + "/" + ($P{REPORT_MONTH}).toString()]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="16" splitType="Stretch">
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="15" width="802" height="1" uuid="e9d2002a-c8ee-4649-a258-640dad29110c"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement style="Column header" x="0" y="0" width="100" height="15" forecolor="#736343" uuid="ab866825-fe46-4756-9d13-7ce45c4c3202">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="04dda69b-4db3-4671-89f7-d30639732343"/>
+				</reportElement>
+				<text><![CDATA[Waktu Pinjam]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="100" y="0" width="100" height="15" forecolor="#736343" uuid="876160d9-c339-4515-a946-2a2a25145d32">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f03b2d41-caf1-49ce-bfa9-39f48e6da168"/>
+				</reportElement>
+				<text><![CDATA[Nomor Induk Peminjam]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="200" y="0" width="100" height="15" forecolor="#736343" uuid="cd89af98-b523-44fc-bcc0-529cede9e8b3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="77fd5bef-3b35-4c4e-b14d-25fd36f214e9"/>
+				</reportElement>
+				<text><![CDATA[Nama Peminjam]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="300" y="0" width="100" height="15" forecolor="#736343" uuid="a1e4a212-8958-4fd9-8a3f-c54b0d51593e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ef2a22e6-2217-42a0-8afc-4f6d1874fbf6"/>
+				</reportElement>
+				<text><![CDATA[Status Peminjaman]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="400" y="0" width="100" height="15" forecolor="#736343" uuid="51192d5f-c6dc-4e4a-abec-5fca32bccbed">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3c5cd150-c4ee-4c13-87b9-cb1154e281fd"/>
+				</reportElement>
+				<text><![CDATA[Waktu Kembali]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="500" y="0" width="100" height="15" forecolor="#736343" uuid="53b97dc3-3fc7-4937-aec6-ed1b887af695">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="927ce417-9527-46a5-b01b-24ebf22916f2"/>
+				</reportElement>
+				<text><![CDATA[Keterlambatan]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="600" y="0" width="100" height="15" forecolor="#736343" uuid="228791fe-aed3-46c2-993b-bc19e2e125ed">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e72624c2-6881-494a-a7d1-e0fe2eb4d53c"/>
+				</reportElement>
+				<text><![CDATA[Barang Dipinjam]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="700" y="0" width="100" height="15" forecolor="#736343" uuid="a7550912-c672-491e-922e-c03299a01106">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8c663fb6-1f73-431d-9bf1-2cb0993199b5"/>
+				</reportElement>
+				<text><![CDATA[Petugas]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<frame>
+				<reportElement style="Row" mode="Opaque" x="0" y="0" width="802" height="15" uuid="fa7cec56-4ec1-48e6-a26e-7266a995d174"/>
+				<textField isStretchWithOverflow="true">
+					<reportElement style="Detail" x="0" y="0" width="100" height="15" uuid="2322667f-a7bd-4601-8658-747dd838ce80">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="04dda69b-4db3-4671-89f7-d30639732343"/>
+					</reportElement>
+					<textFieldExpression><![CDATA[$F{Waktu_Pinjam}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement style="Detail" x="100" y="0" width="100" height="15" uuid="c00fa863-6fcb-4de7-a553-9892cf71be6d">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f03b2d41-caf1-49ce-bfa9-39f48e6da168"/>
+					</reportElement>
+					<textFieldExpression><![CDATA[$F{Nomor_Induk_Peminjam}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement style="Detail" x="200" y="0" width="100" height="15" uuid="20e3bb8d-8999-4acc-9aff-5f82a547c25e">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="77fd5bef-3b35-4c4e-b14d-25fd36f214e9"/>
+					</reportElement>
+					<textFieldExpression><![CDATA[$F{Nama_Peminjam}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement style="Detail" x="300" y="0" width="100" height="15" uuid="eed4b884-feb3-4d4e-afb7-c6381cf77868">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ef2a22e6-2217-42a0-8afc-4f6d1874fbf6"/>
+					</reportElement>
+					<textFieldExpression><![CDATA[$F{Status_Peminjaman}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement style="Detail" x="400" y="0" width="100" height="15" uuid="eeaa903f-63fd-4518-b43e-3cf3de96d197">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3c5cd150-c4ee-4c13-87b9-cb1154e281fd"/>
+					</reportElement>
+					<textFieldExpression><![CDATA[$F{Waktu_Kembali}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement style="Detail" x="500" y="0" width="100" height="15" uuid="275715f1-1339-40bc-9c74-a95a7ccb1c28">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="927ce417-9527-46a5-b01b-24ebf22916f2"/>
+					</reportElement>
+					<textFieldExpression><![CDATA[$F{Keterlambatan}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement style="Detail" x="600" y="0" width="100" height="15" uuid="0adf4b4a-9b74-4e7d-8784-4f27e3bfe16b">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e72624c2-6881-494a-a7d1-e0fe2eb4d53c"/>
+					</reportElement>
+					<textFieldExpression><![CDATA[$F{Barang_Dipinjam}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement style="Detail" x="700" y="0" width="100" height="15" uuid="8da59b92-a7f6-4915-8cea-15937d8ddd3e">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8c663fb6-1f73-431d-9bf1-2cb0993199b5"/>
+					</reportElement>
+					<textFieldExpression><![CDATA[$F{PJ}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="6" splitType="Stretch">
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="3" width="802" height="1" uuid="fa5e88d5-a011-4e32-8f12-ce923f903111"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</line>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="25" splitType="Stretch">
+			<frame>
+				<reportElement mode="Opaque" x="-21" y="1" width="843" height="24" forecolor="#D0B48E" backcolor="#F2EBDF" uuid="5d8169bd-4a75-48c8-8a68-6d3ad5ba9402"/>
+				<textField evaluationTime="Report">
+					<reportElement style="Column header" x="783" y="1" width="40" height="20" forecolor="#736343" uuid="e5e27efa-b599-499b-9ca3-848cb511cb7b"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="Column header" x="703" y="1" width="80" height="20" forecolor="#736343" uuid="18cfe1ca-f7d6-48b0-9827-28578b42a5e0"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+				</textField>
+				<textField pattern="EEEEE dd MMMMM yyyy">
+					<reportElement style="Column header" x="22" y="1" width="197" height="20" forecolor="#736343" uuid="fbce24bb-3cb1-44a3-8eec-8c067ddbe5b5"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>
